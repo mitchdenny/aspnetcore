@@ -106,6 +106,8 @@
       "src\\Middleware\\StaticFiles\\src\\Microsoft.AspNetCore.StaticFiles.csproj",
       "src\\Middleware\\StaticFiles\\test\\FunctionalTests\\Microsoft.AspNetCore.StaticFiles.FunctionalTests.csproj",
       "src\\Middleware\\StaticFiles\\test\\UnitTests\\Microsoft.AspNetCore.StaticFiles.Tests.csproj",
+      "src\\Middleware\\WebFinger\\samples\\BasicWebFingerSample\\BasicWebFingerSample.csproj",
+      "src\\Middleware\\WebFinger\\src\\Microsoft.AspNetCore.WebFinger.csproj",
       "src\\Middleware\\WebSockets\\samples\\EchoApp\\EchoApp.csproj",
       "src\\Middleware\\WebSockets\\samples\\TestServer\\WebSockets.TestServer.csproj",
       "src\\Middleware\\WebSockets\\src\\Microsoft.AspNetCore.WebSockets.csproj",

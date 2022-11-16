@@ -1,0 +1,1 @@
+static Microsoft.AspNetCore.WebFinger.WebFingerApplicationBuilderExtensions.UseWebFinger(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!

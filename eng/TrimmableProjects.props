@@ -81,6 +81,7 @@
     <TrimmableProject Include="Microsoft.AspNetCore.SpaProxy" />
     <TrimmableProject Include="Microsoft.AspNetCore.SpaServices.Extensions" />
     <TrimmableProject Include="Microsoft.AspNetCore.StaticFiles" />
+    <TrimmableProject Include="Microsoft.AspNetCore.WebFinger" />
     <TrimmableProject Include="Microsoft.AspNetCore.WebSockets" />
     <TrimmableProject Include="Microsoft.AspNetCore.Components.Authorization" />
     <TrimmableProject Include="Microsoft.AspNetCore.Components" />
