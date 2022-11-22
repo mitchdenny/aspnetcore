@@ -10,18 +10,22 @@ namespace Microsoft.AspNetCore.WebFinger;
 /// </summary>
 public static class WebFingerServiceCollectionExtensions
 {
+    public static IWebFingerBuilder AddWebFinger(this IServiceCollection services)
+        => services.AddWebFinger((options) => { });
+
     /// <summary>
     /// Add Web Finger services and configure the related options.
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/> for adding services.</param>
     /// <param name="configureOptions">A delegate to configure the <see cref="WebFingerOptions"/>.</param>
     /// <returns></returns>
-    public static IServiceCollection AddWebFinger(this IServiceCollection services, Action<WebFingerOptions> configureOptions)
+    public static IWebFingerBuilder AddWebFinger(this IServiceCollection services, Action<WebFingerOptions> configureOptions)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configureOptions);
 
         services.Configure(configureOptions);
-        return services;
+        services.AddScoped<WebFingerHandler>();
+        return new WebFingerBuilder(services);
     }
 }
