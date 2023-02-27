@@ -9,6 +9,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
 using Microsoft.AspNetCore.Http.Generators.StaticRouteHandlerModel;
+using System.IO;
+using System.CodeDom.Compiler;
 
 namespace Microsoft.AspNetCore.Http.Generators;
 
@@ -100,29 +102,42 @@ public sealed class RequestDelegateGenerator : IIncrementalGenerator
             .Select((endpoints, _) =>
             {
                 var dedupedByDelegate = endpoints.Distinct(EndpointDelegateComparer.Instance);
-                var code = new StringBuilder();
+
+                using var sw = new StringWriter();
+                var itw = new IndentedTextWriter(sw);
+
                 foreach (var endpoint in dedupedByDelegate)
                 {
-                    code.AppendLine($$"""
-        internal static global::Microsoft.AspNetCore.Builder.RouteHandlerBuilder {{endpoint.HttpMethod}}(
-            this global::Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints,
-            [global::System.Diagnostics.CodeAnalysis.StringSyntax("Route")] string pattern,
-            global::{{endpoint.EmitHandlerDelegateType()}} handler,
-            [global::System.Runtime.CompilerServices.CallerFilePath] string filePath = "",
-            [global::System.Runtime.CompilerServices.CallerLineNumber]int lineNumber = 0)
-        {
-            return global::Microsoft.AspNetCore.Http.Generated.GeneratedRouteBuilderExtensionsCore.MapCore(
-                    endpoints,
-                    pattern,
-                    handler,
-                    {{endpoint.EmitVerb()}},
-                    filePath,
-                    lineNumber);
-        }
-""");
-               }
+                    itw.WriteLine($$"""internal static global::Microsoft.AspNetCore.Builder.RouteHandlerBuilder {{endpoint.HttpMethod}}(""");
+                    itw.Indent++;
+                    {
+                        itw.WriteLine($$"""this global::Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints,""");
+                        itw.WriteLine($$"""[global::System.Diagnostics.CodeAnalysis.StringSyntax("Route")] string pattern,""");
+                        itw.WriteLine($$"""global::{{endpoint.EmitHandlerDelegateType()}} handler,""");
+                        itw.WriteLine($$"""[global::System.Runtime.CompilerServices.CallerFilePath] string filePath = "",""");
+                        itw.WriteLine($$"""[global::System.Runtime.CompilerServices.CallerLineNumber]int lineNumber = 0)""");
+                    }
+                    itw.Indent--;
+                    itw.WriteLine("{");
+                    itw.Indent++;
+                    {
+                        itw.WriteLine($$"""return global::Microsoft.AspNetCore.Http.Generated.GeneratedRouteBuilderExtensionsCore.MapCore(""");
+                        itw.Indent++;
+                        {
+                            itw.WriteLine($$"""endpoints,""");
+                            itw.WriteLine($$"""pattern,""");
+                            itw.WriteLine($$"""handler,""");
+                            itw.WriteLine($$"""{{endpoint.EmitVerb()}},""");
+                            itw.WriteLine($$"""filePath,""");
+                            itw.WriteLine($$"""lineNumber);""");
+                        }
+                        itw.Indent--;
+                    }
+                    itw.Indent--;
+                    itw.WriteLine("}");
+                }
 
-                return code.ToString();
+                return sw.ToString();
             });
 
         var thunksAndEndpoints = thunks.Collect().Combine(stronglyTypedEndpointDefinitions);
