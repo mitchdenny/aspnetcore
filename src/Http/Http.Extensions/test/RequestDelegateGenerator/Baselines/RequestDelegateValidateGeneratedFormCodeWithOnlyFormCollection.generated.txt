@@ -37,10 +37,10 @@ namespace Microsoft.AspNetCore.Builder
         private static readonly string[] DeleteVerb = new[] { global::Microsoft.AspNetCore.Http.HttpMethods.Delete };
         private static readonly string[] PatchVerb = new[] { global::Microsoft.AspNetCore.Http.HttpMethods.Patch };
 
-        internal static global::Microsoft.AspNetCore.Builder.RouteHandlerBuilder MapGet(
+        internal static global::Microsoft.AspNetCore.Builder.RouteHandlerBuilder MapPost(
             this global::Microsoft.AspNetCore.Routing.IEndpointRouteBuilder endpoints,
             [global::System.Diagnostics.CodeAnalysis.StringSyntax("Route")] string pattern,
-            global::System.Func<global::System.String> handler,
+            global::System.Action<global::Microsoft.AspNetCore.Http.HttpContext, global::Microsoft.AspNetCore.Http.IFormCollection> handler,
             [global::System.Runtime.CompilerServices.CallerFilePath] string filePath = "",
             [global::System.Runtime.CompilerServices.CallerLineNumber]int lineNumber = 0)
         {
@@ -48,7 +48,7 @@ namespace Microsoft.AspNetCore.Builder
                 endpoints,
                 pattern,
                 handler,
-                GetVerb,
+                PostVerb,
                 filePath,
                 lineNumber);
         }
@@ -91,18 +91,20 @@ namespace Microsoft.AspNetCore.Http.Generated
 
         private static readonly Dictionary<(string, int), (MetadataPopulator, RequestDelegateFactoryFunc)> map = new()
         {
-            [(@"TestMapActions.cs", 25)] = (
+            [(@"TestMapActions.cs", 29)] = (
                 (methodInfo, options) =>
                 {
                     Debug.Assert(options?.EndpointBuilder != null, "EndpointBuilder not found.");
-                    options.EndpointBuilder.Metadata.Add(new SourceKey(@"TestMapActions.cs", 25));
-                    options.EndpointBuilder.Metadata.Add(new GeneratedProducesResponseTypeMetadata(type: null, statusCode: StatusCodes.Status200OK, contentTypes: GeneratedMetadataConstants.PlaintextContentType));
+                    options.EndpointBuilder.Metadata.Add(new SourceKey(@"TestMapActions.cs", 29));
+                    options.EndpointBuilder.Metadata.Add(new GeneratedAcceptsMetadata(contentTypes: GeneratedMetadataConstants.FormContentType));
                     return new RequestDelegateMetadataResult { EndpointMetadata = options.EndpointBuilder.Metadata.AsReadOnly() };
                 },
                 (del, options, inferredMetadataResult) =>
                 {
-                    var handler = (System.Func<global::System.String>)del;
+                    var handler = (System.Action<global::Microsoft.AspNetCore.Http.HttpContext, global::Microsoft.AspNetCore.Http.IFormCollection>)del;
                     EndpointFilterDelegate? filteredInvocation = null;
+                    var serviceProvider = options?.ServiceProvider ?? options?.EndpointBuilder?.ApplicationServices;
+                    var logOrThrowExceptionHelper = new LogOrThrowExceptionHelper(serviceProvider, options);
 
                     if (options?.EndpointBuilder?.FilterFactories.Count > 0)
                     {
@@ -112,33 +114,64 @@ namespace Microsoft.AspNetCore.Http.Generated
                             {
                                 return ValueTask.FromResult<object?>(Results.Empty);
                             }
-                            return ValueTask.FromResult<object?>(handler());
+                            handler(ic.GetArgument<global::Microsoft.AspNetCore.Http.HttpContext>(0)!, ic.GetArgument<global::Microsoft.AspNetCore.Http.IFormCollection>(1)!);
+                            return ValueTask.FromResult<object?>(Results.Empty);
                         },
                         options.EndpointBuilder,
                         handler.Method);
                     }
 
-                    Task RequestHandler(HttpContext httpContext)
+                    async Task RequestHandler(HttpContext httpContext)
                     {
                         var wasParamCheckFailure = false;
+                        var httpContext_local = httpContext;
+                        // Endpoint Parameter: collection (Type = Microsoft.AspNetCore.Http.IFormCollection, IsOptional = False, IsParsable = False, IsArray = False, Source = FormBody)
+                        var collection_resolveFormResult = await GeneratedRouteBuilderExtensionsCore.TryResolveFormAsync(httpContext, logOrThrowExceptionHelper, "IFormCollection", "collection");
+                        if (!collection_resolveFormResult.Item1)
+                        {
+                            return;
+                        }
+                        var collection_raw = httpContext.Request.Form;
+                        if (collection_raw == null)
+                        {
+                            wasParamCheckFailure = true;
+                            logOrThrowExceptionHelper.RequiredParameterNotProvided("IFormCollection", "collection", "form");
+                        }
+                        var collection_temp = collection_raw;
+                        global::Microsoft.AspNetCore.Http.IFormCollection collection_local = collection_temp!;
+
                         if (wasParamCheckFailure)
                         {
                             httpContext.Response.StatusCode = 400;
-                            return Task.CompletedTask;
+                            return;
                         }
-                        httpContext.Response.ContentType ??= "text/plain";
-                        var result = handler();
-                        return httpContext.Response.WriteAsync(result);
+                        handler(httpContext_local, collection_local!);
                     }
 
                     async Task RequestHandlerFiltered(HttpContext httpContext)
                     {
                         var wasParamCheckFailure = false;
+                        var httpContext_local = httpContext;
+                        // Endpoint Parameter: collection (Type = Microsoft.AspNetCore.Http.IFormCollection, IsOptional = False, IsParsable = False, IsArray = False, Source = FormBody)
+                        var collection_resolveFormResult = await GeneratedRouteBuilderExtensionsCore.TryResolveFormAsync(httpContext, logOrThrowExceptionHelper, "IFormCollection", "collection");
+                        if (!collection_resolveFormResult.Item1)
+                        {
+                            return;
+                        }
+                        var collection_raw = httpContext.Request.Form;
+                        if (collection_raw == null)
+                        {
+                            wasParamCheckFailure = true;
+                            logOrThrowExceptionHelper.RequiredParameterNotProvided("IFormCollection", "collection", "form");
+                        }
+                        var collection_temp = collection_raw;
+                        global::Microsoft.AspNetCore.Http.IFormCollection collection_local = collection_temp!;
+
                         if (wasParamCheckFailure)
                         {
                             httpContext.Response.StatusCode = 400;
                         }
-                        var result = await filteredInvocation(EndpointFilterInvocationContext.Create(httpContext));
+                        var result = await filteredInvocation(EndpointFilterInvocationContext.Create<global::Microsoft.AspNetCore.Http.HttpContext, global::Microsoft.AspNetCore.Http.IFormCollection>(httpContext, httpContext_local, collection_local!));
                         await GeneratedRouteBuilderExtensionsCore.ExecuteObjectResult(result, httpContext);
                     }
 
@@ -197,6 +230,50 @@ namespace Microsoft.AspNetCore.Http.Generated
             }
         }
 
+        private static async Task<(bool, object?)> TryResolveFormAsync(
+            HttpContext httpContext,
+            LogOrThrowExceptionHelper logOrThrowExceptionHelper,
+            string parameterTypeName,
+            string parameterName)
+        {
+            object? formValue = null;
+            var feature = httpContext.Features.Get<Microsoft.AspNetCore.Http.Features.IHttpRequestBodyDetectionFeature>();
+
+            if (feature?.CanHaveBody == true)
+            {
+                if (!httpContext.Request.HasFormContentType)
+                {
+                    logOrThrowExceptionHelper.UnexpectedNonFormContentType(httpContext.Request.ContentType);
+                    httpContext.Response.StatusCode = StatusCodes.Status415UnsupportedMediaType;
+                    return (false, null);
+                }
+
+                try
+                {
+                    formValue = await httpContext.Request.ReadFormAsync();
+                }
+                catch (BadHttpRequestException ex)
+                {
+                    logOrThrowExceptionHelper.RequestBodyIOException(ex);
+                    httpContext.Response.StatusCode = ex.StatusCode;
+                    return (false, null);
+                }
+                catch (IOException ex)
+                {
+                    logOrThrowExceptionHelper.RequestBodyIOException(ex);
+                    httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+                    return (false, null);
+                }
+                catch (InvalidDataException ex)
+                {
+                    logOrThrowExceptionHelper.InvalidFormRequestBody(parameterTypeName, parameterName, ex);
+                    httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+                    return (false, null);
+                }
+            }
+
+            return (true, formValue);
+        }
 
     }
 
