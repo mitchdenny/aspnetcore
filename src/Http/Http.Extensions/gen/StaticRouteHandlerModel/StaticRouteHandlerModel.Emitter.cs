@@ -277,7 +277,7 @@ internal static class StaticRouteHandlerModelEmitter
             codeWriter.WriteLine("if (inferredBodyParameters.Count() == 1)");
             codeWriter.StartBlock();
             codeWriter.WriteLine("var inferredBodyParameter = inferredBodyParameters.Single();");
-            codeWriter.WriteLine($$"""options!.EndpointBuilder.Metadata.Add(new GeneratedAcceptsMetadata(type: inferredBodyParameter.Item2, isOptional: inferredBodyParameter.Item1, contentTypes: GeneratedMetadataConstants.JsonContentType));""");
+            codeWriter.WriteLine($$"""options.EndpointBuilder.Metadata.Add(new GeneratedAcceptsMetadata(type: inferredBodyParameter.Item2, isOptional: inferredBodyParameter.Item1, contentTypes: GeneratedMetadataConstants.JsonContentType));""");
             codeWriter.EndBlock();
         }
         else
